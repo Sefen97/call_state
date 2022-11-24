@@ -1,47 +1,35 @@
 import 'dart:io';
+import 'package:contacts/call_state/request_permition.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:phone_state/phone_state.dart';
 
 main() {
   runApp(
     const MaterialApp(
-      home: Example(),
+      home: Home(),
     ),
   );
 }
 
-class Example extends StatefulWidget {
-  const Example({Key? key}) : super(key: key);
+class Home extends StatefulWidget {
+  const Home({Key? key}) : super(key: key);
 
   @override
-  _ExampleState createState() => _ExampleState();
+  State<Home> createState() => _HomeState();
 }
 
-class _ExampleState extends State<Example> {
+class _HomeState extends State<Home> {
   PhoneStateStatus status = PhoneStateStatus.NOTHING;
   bool granted = false;
 
-  Future<bool> requestPermission() async {
-    var status = await Permission.phone.request();
-
-    switch (status) {
-      case PermissionStatus.denied:
-      case PermissionStatus.restricted:
-      case PermissionStatus.limited:
-      case PermissionStatus.permanentlyDenied:
-        return false;
-      case PermissionStatus.granted:
-        return true;
-    }
-  }
-
   @override
   void initState() {
-    requestPermission();
+    requestPermissionPhoneState();
     PhoneState.phoneStateStream.listen((event) {
-      print("test ");
+      if (kDebugMode) {
+        print(event);
+      }
       setState(() {
         if (event != null) {
           status = event;
@@ -50,7 +38,6 @@ class _ExampleState extends State<Example> {
     });
     super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -65,24 +52,6 @@ class _ExampleState extends State<Example> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             if (Platform.isAndroid)
-              MaterialButton(
-                onPressed: !granted
-                    ? () async {
-                        bool temp = await requestPermission();
-                        setState(() {
-                          granted = temp;
-                          if (granted) {
-
-                          }
-                        });
-                      }
-                    : () {
-                  if (kDebugMode) {
-                    print("test");
-                  }
-                },
-                child: const Text("Request permission of Phone"),
-              ),
             const Text(
               "Status of call",
               style: TextStyle(fontSize: 24),
